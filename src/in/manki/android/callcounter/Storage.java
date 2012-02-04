@@ -17,6 +17,7 @@ public class Storage {
   private static final String PREFS_FILE = "CallCounterPrefs";
   private static final String TRACKING_ENABLED = "tracking-enabled";
   private static final String TRACK_MIN_CALL_TIME = "track-min-call-time";
+  private static final String CREDIT_MINUTES = "credit-minutes";
 
   private final SharedPreferences prefs;
   private final CallLogDatabaseOpenHelper dbHelper;
@@ -31,6 +32,10 @@ public class Storage {
         ctx.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     CallLogDatabaseOpenHelper dbHelper = new CallLogDatabaseOpenHelper(ctx);
     return new Storage(prefs, dbHelper);
+  }
+
+  public long getRemainingMinutes() {
+    return getCreditMinutes() - getCumulativeMinutes();
   }
 
   public long getCumulativeMinutes() {
@@ -80,6 +85,7 @@ public class Storage {
     db.close();
 
     setTrackMinCallTime(new Date().getTime());
+    setCreditMinutes(0);
   }
 
   public String getLastTrackedNumber() {
@@ -170,6 +176,16 @@ public class Storage {
   private void setTrackMinCallTime(long t) {
     prefs.edit()
         .putLong(TRACK_MIN_CALL_TIME, t)
+        .commit();
+  }
+
+  public long getCreditMinutes() {
+    return prefs.getLong(CREDIT_MINUTES, 0);
+  }
+
+  public void setCreditMinutes(long mins) {
+    prefs.edit()
+        .putLong(CREDIT_MINUTES, mins)
         .commit();
   }
 

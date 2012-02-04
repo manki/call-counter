@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">CallCounter</string>
+    <string name="app_name">Discount Calls Meter</string>
     <string name="track_voice_calls">Track outgoing International calls</string>
-    <string name="accumulated_calls">Accumulated calls: &lt;b&gt;%1$d&lt;/b&gt; minutes</string>
-    <string name="reset_counter">Reset counter</string>
+    <string name="reset_meter">Reset meter</string>
     <string name="name">Name</string>
     <string name="duration">Duration</string>
     <string name="number">Number</string>
     <string name="minute">minute(s)</string>
+    <string name="add_minutes">Add minutes</string>
+    <string name="call_history">Call history</string>
+    <string name="remaining_minutes">Remaining discount minutes</string>
+    <string name="two_hundred">200</string>
+    <string name="how_many_call_minutes">How many discounted call minutes have you purchased?</string>
+    <string name="ok">OK</string>
+    <string name="reset_warning">This will clear all data including call history and remaining discounted call minutes.</string>
+    <string name="clear_data">Clear all data</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_discount_call_minutes">Add discount call minutes</string>
 
 </resources>

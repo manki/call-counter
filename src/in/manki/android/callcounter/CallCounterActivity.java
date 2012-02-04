@@ -1,13 +1,14 @@
 package in.manki.android.callcounter;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.Html;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -15,20 +16,15 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class CallCounterActivity extends ListActivity {
+
+  private static final String TOP_UP_DIALOG_TAG = "top-up";
+
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     refreshView();
-
-    Button reset = (Button) findViewById(R.id.reset);
-    reset.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        reset();
-      }
-    });
 
     CheckBox enabled = (CheckBox) findViewById(R.id.enabled);
     enabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -45,9 +41,58 @@ public class CallCounterActivity extends ListActivity {
     refreshView();
   }
 
-  private void reset() {
-    getStorage(this).resetDuration();
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    MenuInflater mi = getMenuInflater();
+    mi.inflate(R.menu.main_menu, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.reset_meter:
+        confirmAndReset();
+        return true;
+      case R.id.add_minutes:
+        showTopUpDialog();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    }
+  }
+
+  public void topUp(int minutes) {
+    Storage storage = getStorage(this);
+    storage.setCreditMinutes(storage.getCreditMinutes() + minutes);
     refreshView();
+  }
+
+  private void showTopUpDialog() {
+    TopUpMinutesDialogFragment df = new TopUpMinutesDialogFragment(this);
+    df.show(getFragmentManager(), TOP_UP_DIALOG_TAG);
+  }
+
+  private void confirmAndReset() {
+    AlertDialog alert = new AlertDialog.Builder(this)
+        .setMessage(R.string.reset_warning)
+        .setPositiveButton(R.string.clear_data, new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            CallCounterActivity activity = CallCounterActivity.this;
+            activity.getStorage(activity).resetDuration();
+            activity.refreshView();
+          }
+        })
+        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            dialog.cancel();
+          }
+        })
+        .create();
+    alert.show();
   }
 
   private void setTrackingEnabled(boolean enabled) {
@@ -61,10 +106,8 @@ public class CallCounterActivity extends ListActivity {
     CheckBox enabled = (CheckBox) findViewById(R.id.enabled);
     enabled.setChecked(storage.isTrackingEnabled());
 
-    String fmt = getString(R.string.accumulated_calls);
-    TextView callDuration = (TextView) findViewById(R.id.accumulatedDuration);
-    callDuration.setText(
-        Html.fromHtml(String.format(fmt, storage.getCumulativeMinutes())));
+    TextView remaining = (TextView) findViewById(R.id.remaining_minutes);
+    remaining.setText(String.valueOf(storage.getRemainingMinutes()));
 
     Cursor cursor = storage.getTrackedCalls();
     startManagingCursor(cursor);

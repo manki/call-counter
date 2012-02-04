@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/add_minutes" android:showAsAction="ifRoom" android:title="@string/add_minutes" android:icon="@drawable/ic_action_plus"></item>
+    <item android:id="@+id/reset_meter" android:showAsAction="ifRoom" android:title="@string/reset_meter" android:icon="@drawable/ic_action_clear"></item>
+    
+
+</menu>

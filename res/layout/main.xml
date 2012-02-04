@@ -16,23 +16,31 @@
         android:id="@+id/enabled"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="@string/track_voice_calls" />
 
     <TextView
-        android:id="@+id/accumulatedDuration"
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/accumulated_calls"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_gravity="center"
+        android:text="@string/remaining_minutes"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <Button
-        android:id="@+id/reset"
-        android:layout_width="fill_parent"
+    <TextView
+        android:id="@+id/remaining_minutes"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/reset_counter" />
+        android:layout_gravity="center_horizontal"
+        android:text="@string/two_hundred"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/call_history" />
 
     <ListView
         android:id="@android:id/android:list"
