@@ -1,5 +1,7 @@
 package in.manki.android.callcounter;
 
+import java.util.Date;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,12 +10,13 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class Storage {
 
-  private static final String PREFS_FILE = "CallCounterPrefs";
   private final String REVERSE_CHRONOLOGICAL =
       CallLogDatabaseOpenHelper.CALL_TIME_COLUMN + " DESC";
 
-  // Preference keys.
+  // Preference strings.
+  private static final String PREFS_FILE = "CallCounterPrefs";
   private static final String TRACKING_ENABLED = "tracking-enabled";
+  private static final String TRACK_MIN_CALL_TIME = "track-min-call-time";
 
   private final SharedPreferences prefs;
   private final CallLogDatabaseOpenHelper dbHelper;
@@ -37,13 +40,19 @@ public class Storage {
         new String[] {
             "SUM(" + CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN + ")"
             },
-        CallLogDatabaseOpenHelper.TRACKED_COLUMN + " != 0",
+        CallLogDatabaseOpenHelper.TRACKED_COLUMN + " != 0 AND "
+            + CallLogDatabaseOpenHelper.ARCHIVED_COLUMN + " = 0",
         null,   // where args
         null,   // group by
         null,   // having
         null);  // order by
-    c.moveToNext();
-    return c.getLong(0);
+    try {
+      c.moveToNext();
+      return c.getLong(0);
+    } finally {
+      c.close();
+      db.close();
+    }
   }
 
   public void track(String name, String number, long timestamp, long minutes) {
@@ -69,10 +78,17 @@ public class Storage {
         CallLogDatabaseOpenHelper.ARCHIVED_COLUMN + " = 0",
         null);
     db.close();
+
+    setTrackMinCallTime(new Date().getTime());
   }
 
   public String getLastTrackedNumber() {
-    Cursor c = open(null, null, REVERSE_CHRONOLOGICAL);
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+    Cursor c = open(
+        db,
+        CallLogDatabaseOpenHelper.TRACKED_COLUMN + " = 1",
+        null,
+        REVERSE_CHRONOLOGICAL);
     c.moveToNext();
     try {
       if (c.isAfterLast()) {
@@ -82,11 +98,25 @@ public class Storage {
           c.getColumnIndex(CallLogDatabaseOpenHelper.NUMBER_COLUMN));
     } finally {
       c.close();
+      db.close();
     }
   }
 
   public long getLastTrackedCallTime() {
-    Cursor c = open(null, null, REVERSE_CHRONOLOGICAL);
+    return getLastCallTime(CallLogDatabaseOpenHelper.TRACKED_COLUMN + " = 1");
+  }
+
+  public long getLastKnownCallTime() {
+    return getLastCallTime(null);
+  }
+
+  private long getLastCallTime(String where) {
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+    Cursor c = open(
+        db,
+        where,
+        null,
+        REVERSE_CHRONOLOGICAL);
     c.moveToNext();
     try {
       if (c.isAfterLast()) {
@@ -96,19 +126,30 @@ public class Storage {
           c.getColumnIndex(CallLogDatabaseOpenHelper.CALL_TIME_COLUMN));
     } finally {
       c.close();
+      db.close();
     }
   }
 
-  private Cursor open(String where, String[] whereArgs, String orderBy) {
-    SQLiteDatabase db = dbHelper.getReadableDatabase();
+  private Cursor open(
+      SQLiteDatabase db, String where, String[] whereArgs, String orderBy) {
     return db.query(
         CallLogDatabaseOpenHelper.TRACKED_CALLS_TABLE,
-        null,
+        CallLogDatabaseOpenHelper.ALL_COLUMNS,
         where,
         whereArgs,
         null,    // group by
         null,    // having
         orderBy);
+  }
+
+  public Cursor getTrackedCalls() {
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+    return open(
+        db,
+        CallLogDatabaseOpenHelper.TRACKED_COLUMN + " = 1 AND "
+            + CallLogDatabaseOpenHelper.ARCHIVED_COLUMN + " = 0",
+        null,
+        REVERSE_CHRONOLOGICAL);
   }
 
   public boolean isTrackingEnabled() {
@@ -118,6 +159,17 @@ public class Storage {
   public void setTrackingEnabled(boolean enabled) {
     prefs.edit()
         .putBoolean(TRACKING_ENABLED, enabled)
+        .commit();
+    setTrackMinCallTime(new Date().getTime());
+  }
+
+  public long getTrackMinCallTime() {
+    return prefs.getLong(TRACK_MIN_CALL_TIME, 0);
+  }
+
+  private void setTrackMinCallTime(long t) {
+    prefs.edit()
+        .putLong(TRACK_MIN_CALL_TIME, t)
         .commit();
   }
 

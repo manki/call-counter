@@ -1,22 +1,20 @@
 package in.manki.android.callcounter;
 
-import java.text.DateFormat;
-import java.util.Date;
-
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.Spanned;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class CallCounterActivity extends Activity {
+public class CallCounterActivity extends ListActivity {
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -68,18 +66,23 @@ public class CallCounterActivity extends Activity {
     callDuration.setText(
         Html.fromHtml(String.format(fmt, storage.getCumulativeMinutes())));
 
-    String lastTrackedNumber = storage.getLastTrackedNumber();
-    TextView lastTracked = (TextView) findViewById(R.id.lastTracked);
-    if (lastTrackedNumber == null) {
-      lastTracked.setText(R.string.no_call_has_been_tracked);
-    } else {
-      String lastCallTime = DateFormat.getDateTimeInstance().format(
-          new Date(storage.getLastTrackedCallTime()));
-      fmt = getString(R.string.last_tracked_call);
-      Spanned text = Html.fromHtml(String.format(
-          fmt, lastTrackedNumber, lastCallTime));
-      lastTracked.setText(text);
-    }
+    Cursor cursor = storage.getTrackedCalls();
+    startManagingCursor(cursor);
+    SimpleCursorAdapter adapter = new SimpleCursorAdapter(
+        this,
+        R.layout.call_log_entry,
+        cursor,
+        new String[] {
+            CallLogDatabaseOpenHelper.NAME_COLUMN,
+            CallLogDatabaseOpenHelper.NUMBER_COLUMN,
+            CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN,
+        },
+        new int[] {
+            R.id.name,
+            R.id.number,
+            R.id.duration,
+        });
+    setListAdapter(adapter);
   }
 
   private Storage getStorage(Context ctx) {

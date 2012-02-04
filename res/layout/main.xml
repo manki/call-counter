@@ -27,20 +27,17 @@
         android:text="@string/accumulated_calls"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView
-        android:id="@+id/lastTracked"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/last_tracked_call"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <Button
         android:id="@+id/reset"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/reset_counter" />
+
+    <ListView
+        android:id="@android:id/android:list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
 
 </LinearLayout>

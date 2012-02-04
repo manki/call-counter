@@ -7,16 +7,25 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class CallLogDatabaseOpenHelper extends SQLiteOpenHelper {
 
   public static final String TRACKED_CALLS_TABLE = "TrackedCalls";
-  public static final String ID_COLUMN = "_Id";
+  public static final String ID_COLUMN = "_id";
   public static final String CALL_TIME_COLUMN = "CallTime";
   public static final String NAME_COLUMN = "Name";
   public static final String NUMBER_COLUMN = "Number";
   public static final String CALL_DURATION_COLUMN = "CallDuration";
   public static final String TRACKED_COLUMN = "Tracked";
   public static final String ARCHIVED_COLUMN = "Archived";
+  public static final String[] ALL_COLUMNS = {
+    ID_COLUMN,
+    CALL_TIME_COLUMN,
+    NAME_COLUMN,
+    NUMBER_COLUMN,
+    CALL_DURATION_COLUMN,
+    TRACKED_COLUMN,
+    ARCHIVED_COLUMN,
+  };
 
   private static final String DB_NAME = "CallLog";
-  private static final int DB_VERSION = 1;
+  private static final int DB_VERSION = 2;
 
   public CallLogDatabaseOpenHelper(Context ctx) {
     super(ctx, DB_NAME, null, DB_VERSION);

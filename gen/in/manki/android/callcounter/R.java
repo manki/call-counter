@@ -14,20 +14,26 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int accumulatedDuration=0x7f050002;
-        public static final int enabled=0x7f050001;
-        public static final int lastTracked=0x7f050003;
-        public static final int linearLayout1=0x7f050000;
-        public static final int reset=0x7f050004;
+        public static final int accumulatedDuration=0x7f050006;
+        public static final int duration=0x7f050001;
+        public static final int enabled=0x7f050005;
+        public static final int linearLayout1=0x7f050004;
+        public static final int name=0x7f050000;
+        public static final int number=0x7f050002;
+        public static final int reset=0x7f050007;
+        public static final int textView1=0x7f050003;
     }
     public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int call_log_entry=0x7f030000;
+        public static final int main=0x7f030001;
     }
     public static final class string {
         public static final int accumulated_calls=0x7f040002;
         public static final int app_name=0x7f040000;
-        public static final int last_tracked_call=0x7f040004;
-        public static final int no_call_has_been_tracked=0x7f040005;
+        public static final int duration=0x7f040005;
+        public static final int minute=0x7f040007;
+        public static final int name=0x7f040004;
+        public static final int number=0x7f040006;
         public static final int reset_counter=0x7f040003;
         public static final int track_voice_calls=0x7f040001;
     }

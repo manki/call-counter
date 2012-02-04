@@ -5,7 +5,9 @@
     <string name="track_voice_calls">Track outgoing International calls</string>
     <string name="accumulated_calls">Accumulated calls: &lt;b&gt;%1$d&lt;/b&gt; minutes</string>
     <string name="reset_counter">Reset counter</string>
-    <string name="last_tracked_call">Last tracked: Call to %1$s at %2$s.</string>
-    <string name="no_call_has_been_tracked">No outgoing call has been tracked yet.</string>
+    <string name="name">Name</string>
+    <string name="duration">Duration</string>
+    <string name="number">Number</string>
+    <string name="minute">minute(s)</string>
 
 </resources>
