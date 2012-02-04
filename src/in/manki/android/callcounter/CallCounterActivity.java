@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
@@ -47,17 +48,17 @@ public class CallCounterActivity extends Activity {
   }
 
   private void reset() {
-    Storage.get(this).resetDuration();
+    getStorage(this).resetDuration();
     refreshView();
   }
 
   private void setTrackingEnabled(boolean enabled) {
-    Storage.get(this).setTrackingEnabled(enabled);
+    getStorage(this).setTrackingEnabled(enabled);
     refreshView();
   }
 
   private void refreshView() {
-    Storage storage = Storage.get(this);
+    Storage storage = getStorage(this);
 
     CheckBox enabled = (CheckBox) findViewById(R.id.enabled);
     enabled.setChecked(storage.isTrackingEnabled());
@@ -79,5 +80,9 @@ public class CallCounterActivity extends Activity {
           fmt, lastTrackedNumber, lastCallTime));
       lastTracked.setText(text);
     }
+  }
+
+  private Storage getStorage(Context ctx) {
+    return Storage.get(ctx);
   }
 }

@@ -9,9 +9,10 @@ import android.util.Log;
 
 public class CallTracker extends BroadcastReceiver {
 
-  private static final long TEN_SECONDS_IN_MILLIS = 10 * 1000;
+  private static final long WAIT_TIME_FOR_CALL_LOG_UPDATE = 10 * 1000;
   private static final String[] SELECTED_COLS = new String[] {
       CallLog.Calls.DATE,
+      CallLog.Calls.CACHED_NAME,
       CallLog.Calls.NUMBER,
       CallLog.Calls.DURATION,
   };
@@ -30,7 +31,7 @@ public class CallTracker extends BroadcastReceiver {
         // Wait for call log database to be updated.
         // Otherwise we won't find the call that has just ended.
         try {
-          Thread.sleep(TEN_SECONDS_IN_MILLIS);
+          Thread.sleep(WAIT_TIME_FOR_CALL_LOG_UPDATE);
         } catch (InterruptedException e) {
           // Just ignore.
         }
@@ -46,17 +47,20 @@ public class CallTracker extends BroadcastReceiver {
                 String.valueOf(lastCallTime)},
                 CallLog.Calls.DATE);
         while (cursor.moveToNext()) {
-          long callTime =
-              cursor.getLong(cursor.getColumnIndex(CallLog.Calls.DATE));
-          String number =
-              cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER));
-          long duration =
-              cursor.getLong(cursor.getColumnIndex(CallLog.Calls.DURATION));
+          long callTime = cursor.getLong(
+              cursor.getColumnIndex(CallLog.Calls.DATE));
+          String name = cursor.getString(
+              cursor.getColumnIndex(CallLog.Calls.CACHED_NAME));
+          String number = cursor.getString(
+              cursor.getColumnIndex(CallLog.Calls.NUMBER));
+          long seconds = cursor.getLong(
+              cursor.getColumnIndex(CallLog.Calls.DURATION));
           if (isInternationalCall(number)) {
-            storage.track(number, callTime, duration);
+            long minutes = (long) Math.ceil(seconds / 60.0);
+            storage.track(name, number, callTime, minutes);
             Log.d("CallCounter",
                 String.format("Tracked call to %s for %d seconds.",
-                    number, duration));
+                    number, minutes));
           }
         }
       }
