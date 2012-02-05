@@ -60,13 +60,13 @@ public class CallTracker extends BroadcastReceiver {
               cursor.getColumnIndex(CallLog.Calls.NUMBER));
           long seconds = cursor.getLong(
               cursor.getColumnIndex(CallLog.Calls.DURATION));
-          if (isInternationalCall(number)) {
-            long minutes = (long) Math.ceil(seconds / 60.0);
-            storage.track(name, number, callTime, minutes);
-            Log.d("CallCounter",
-                String.format("Tracked call to %s for %d seconds.",
-                    number, minutes));
-          }
+          boolean tracked =
+              storage.isTrackingEnabled() && isTrackableCall(storage, number);
+          long minutes = (long) Math.ceil(seconds / 60.0);
+          storage.track(name, number, callTime, minutes, tracked);
+          Log.d("CallCounter",
+              String.format("Tracked call to %s for %d seconds.",
+                  number, minutes));
         }
       }
     }).start();
@@ -81,11 +81,16 @@ public class CallTracker extends BroadcastReceiver {
     return str == null ? "" : str;
   }
 
-  private boolean isInternationalCall(String number) {
-    if (number.startsWith("+")) {
-      return !number.startsWith("+61");
-    } else {
-      return number.startsWith("0011");
+  private boolean isTrackableCall(Storage storage, String number) {
+    for (String prefix : storage.getTrackabelNumberPrefixes()) {
+      if (prefix.startsWith("~")) {
+        if (number.startsWith(prefix.substring(1))) {
+          return false;
+        }
+      } else if (number.startsWith(prefix)) {
+        return true;
+      }
     }
+    return false;
   }
 }

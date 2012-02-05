@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Discount Calls Meter</string>
-    <string name="track_voice_calls">Track outgoing International calls</string>
+    <string name="track_voice_calls">Track outgoing voice calls</string>
     <string name="reset_meter">Reset meter</string>
     <string name="name">Name</string>
     <string name="duration">Duration</string>
@@ -10,7 +10,7 @@
     <string name="minute">minute(s)</string>
     <string name="add_minutes">Add minutes</string>
     <string name="call_history">Call history</string>
-    <string name="remaining_minutes">Remaining discount minutes</string>
+    <string name="remaining_minutes">Remaining discount minutes:</string>
     <string name="two_hundred">200</string>
     <string name="how_many_call_minutes">How many discounted call minutes have you purchased?</string>
     <string name="ok">OK</string>
@@ -18,5 +18,7 @@
     <string name="clear_data">Clear all data</string>
     <string name="cancel">Cancel</string>
     <string name="add_discount_call_minutes">Add discount call minutes</string>
+    <string name="prefix_caption">Phone number prefixes qualified for discount:</string>
+    <string name="prefix_sample">+91\n0011</string>
 
 </resources>

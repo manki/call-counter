@@ -1,12 +1,17 @@
 package in.manki.android.callcounter;
 
 import java.util.Date;
+import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 
 public class Storage {
 
@@ -18,6 +23,7 @@ public class Storage {
   private static final String TRACKING_ENABLED = "tracking-enabled";
   private static final String TRACK_MIN_CALL_TIME = "track-min-call-time";
   private static final String CREDIT_MINUTES = "credit-minutes";
+  private static final String NUMBER_PREFIXES = "number-prefixes";
 
   private final SharedPreferences prefs;
   private final CallLogDatabaseOpenHelper dbHelper;
@@ -60,13 +66,13 @@ public class Storage {
     }
   }
 
-  public void track(String name, String number, long timestamp, long minutes) {
+  public void track(String name, String number, long timestamp, long minutes, boolean tracked) {
     ContentValues values = new ContentValues();
     values.put(CallLogDatabaseOpenHelper.CALL_TIME_COLUMN, timestamp);
     values.put(CallLogDatabaseOpenHelper.NAME_COLUMN, name);
     values.put(CallLogDatabaseOpenHelper.NUMBER_COLUMN, number);
     values.put(CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN, minutes);
-    values.put(CallLogDatabaseOpenHelper.TRACKED_COLUMN, isTrackingEnabled());
+    values.put(CallLogDatabaseOpenHelper.TRACKED_COLUMN, tracked);
     values.put(CallLogDatabaseOpenHelper.ARCHIVED_COLUMN, false);
     SQLiteDatabase db = dbHelper.getWritableDatabase();
     db.insert(CallLogDatabaseOpenHelper.TRACKED_CALLS_TABLE, null, values);
@@ -189,4 +195,14 @@ public class Storage {
         .commit();
   }
 
+  public Set<String> getTrackabelNumberPrefixes() {
+    String prefixes = prefs.getString(NUMBER_PREFIXES, "");
+    return ImmutableSet.copyOf(Splitter.on(' ').split(prefixes));
+  }
+
+  public void setTrackableNumberPrefixes(Set<String> prefixes) {
+    prefs.edit()
+        .putString(NUMBER_PREFIXES, Joiner.on(' ').join(prefixes))
+        .commit();
+  }
 }

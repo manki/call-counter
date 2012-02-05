@@ -1,21 +1,33 @@
 package in.manki.android.callcounter;
 
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnKeyListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class CallCounterActivity extends ListActivity {
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
+
+public class CallCounterActivity extends FragmentActivity {
 
   private static final String TOP_UP_DIALOG_TAG = "top-up";
 
@@ -33,6 +45,24 @@ public class CallCounterActivity extends ListActivity {
         setTrackingEnabled(isChecked);
       }
     });
+
+    final EditText prefixes = (EditText) findViewById(R.id.prefixes);
+    prefixes.setOnKeyListener(new OnKeyListener() {
+      @Override
+      public boolean onKey(View v, int keyCode, KeyEvent event) {
+        Storage storage = getStorage(CallCounterActivity.this);
+        storage.setTrackableNumberPrefixes(split(prefixes.getText().toString()));
+        return false;
+      }
+    });
+  }
+
+  private Set<String> split(String str) {
+    return ImmutableSet.copyOf(
+        Splitter.on(Pattern.compile(",|;|\\s"))
+            .trimResults()
+            .omitEmptyStrings()
+            .split(str));
   }
 
   @Override
@@ -71,7 +101,7 @@ public class CallCounterActivity extends ListActivity {
 
   private void showTopUpDialog() {
     TopUpMinutesDialogFragment df = new TopUpMinutesDialogFragment(this);
-    df.show(getFragmentManager(), TOP_UP_DIALOG_TAG);
+    df.show(getSupportFragmentManager(), TOP_UP_DIALOG_TAG);
   }
 
   private void confirmAndReset() {
@@ -103,11 +133,15 @@ public class CallCounterActivity extends ListActivity {
   private void refreshView() {
     Storage storage = getStorage(this);
 
+    TextView remaining = (TextView) findViewById(R.id.remaining_minutes);
+    remaining.setText(String.valueOf(storage.getRemainingMinutes()));
+
     CheckBox enabled = (CheckBox) findViewById(R.id.enabled);
     enabled.setChecked(storage.isTrackingEnabled());
 
-    TextView remaining = (TextView) findViewById(R.id.remaining_minutes);
-    remaining.setText(String.valueOf(storage.getRemainingMinutes()));
+    EditText prefixes = (EditText) findViewById(R.id.prefixes);
+    prefixes.setText(
+        Joiner.on('\n').join(storage.getTrackabelNumberPrefixes()));
 
     Cursor cursor = storage.getTrackedCalls();
     startManagingCursor(cursor);
@@ -125,7 +159,8 @@ public class CallCounterActivity extends ListActivity {
             R.id.number,
             R.id.duration,
         });
-    setListAdapter(adapter);
+    ListView callHistory = (ListView) findViewById(R.id.call_history);
+    callHistory.setAdapter(adapter);
   }
 
   private Storage getStorage(Context ctx) {
