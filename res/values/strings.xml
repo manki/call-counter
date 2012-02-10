@@ -14,8 +14,8 @@
     <string name="two_hundred">200</string>
     <string name="how_many_call_minutes">How many discounted call minutes have you purchased?</string>
     <string name="ok">OK</string>
-    <string name="reset_warning">This will clear all data including call history and remaining discounted call minutes.</string>
-    <string name="clear_data">Clear all data</string>
+    <string name="reset_warning">This will delete call history and remaining discounted call minutes.</string>
+    <string name="clear_data">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="add_discount_call_minutes">Add discount call minutes</string>
     <string name="prefix_caption">Phone number prefixes qualified for discount:</string>
