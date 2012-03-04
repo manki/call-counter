@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.provider.CallLog;
-import android.util.Log;
 
 public class CallTracker extends BroadcastReceiver {
 
@@ -64,9 +63,6 @@ public class CallTracker extends BroadcastReceiver {
               storage.isTrackingEnabled() && isTrackableCall(storage, number);
           long minutes = (long) Math.ceil(seconds / 60.0);
           storage.track(name, number, callTime, minutes, tracked);
-          Log.d("CallCounter",
-              String.format("Tracked call to %s for %d seconds.",
-                  number, minutes));
         }
       }
     }).start();
