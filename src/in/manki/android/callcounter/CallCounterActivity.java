@@ -1,5 +1,6 @@
 package in.manki.android.callcounter;
 
+import java.util.Date;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -9,6 +10,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -152,13 +154,32 @@ public class CallCounterActivity extends FragmentActivity {
         new String[] {
             CallLogDatabaseOpenHelper.NAME_COLUMN,
             CallLogDatabaseOpenHelper.NUMBER_COLUMN,
+            CallLogDatabaseOpenHelper.CALL_TIME_COLUMN,
             CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN,
         },
         new int[] {
             R.id.name,
             R.id.number,
+            R.id.call_time,
             R.id.duration,
-        });
+        }) {
+      private static final long TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+      @Override
+      public void setViewText(TextView v, String text) {
+        if (v.getId() == R.id.call_time) {
+          long callTime = Long.parseLong(text);
+          long now = new Date().getTime();
+          if (now - callTime < TWENTY_FOUR_HOURS) {
+            text = DateFormat.getTimeFormat(CallCounterActivity.this)
+                .format(new Date(callTime));
+          } else {
+            text = DateFormat.getDateFormat(CallCounterActivity.this)
+                .format(new Date(callTime));
+          }
+        }
+        super.setViewText(v, text);
+      }
+    };
     ListView callHistory = (ListView) findViewById(R.id.call_history);
     callHistory.setAdapter(adapter);
   }

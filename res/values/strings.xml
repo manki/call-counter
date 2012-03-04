@@ -20,5 +20,6 @@
     <string name="add_discount_call_minutes">Add discount call minutes</string>
     <string name="prefix_caption">Phone number prefixes qualified for discount:</string>
     <string name="prefix_sample">+91\n0011</string>
+    <string name="call_time">Call Time</string>
 
 </resources>
