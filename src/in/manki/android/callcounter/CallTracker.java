@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.provider.CallLog;
+import android.util.Log;
 
 public class CallTracker extends BroadcastReceiver {
 
+  private static final String TAG = "CallTracker";
   private static final long WAIT_TIME_FOR_CALL_LOG_UPDATE = 10 * 1000;
   private static final String[] SELECTED_COLS = new String[] {
       CallLog.Calls.DATE,
@@ -30,6 +32,7 @@ public class CallTracker extends BroadcastReceiver {
         // Wait for call log database to be updated.
         // Otherwise we won't find the call that has just ended.
         try {
+          Log.d(TAG, "Sleeping for call log to be updated.");
           Thread.sleep(WAIT_TIME_FOR_CALL_LOG_UPDATE);
         } catch (InterruptedException e) {
           // Just ignore.
@@ -38,6 +41,7 @@ public class CallTracker extends BroadcastReceiver {
         long limit = Math.max(
             storage.getTrackMinCallTime(), storage.getLastKnownCallTime());
         if (limit == 0) {
+          Log.d(TAG, "Tracking disabled; exiting.");
           return;
         }
 
@@ -63,7 +67,31 @@ public class CallTracker extends BroadcastReceiver {
               storage.isTrackingEnabled() && isTrackableCall(storage, number);
           long minutes = (long) Math.ceil(seconds / 60.0);
           storage.track(name, number, callTime, minutes, tracked);
+          Log.d(TAG, String.format("Tracking %d minutes long call to %s.",
+              obfuscate(number), minutes));
         }
+      }
+
+      private String noNull(String str) {
+        return str == null ? "" : str;
+      }
+
+      private String obfuscate(String number) {
+        int len = number.length();
+        int mid = len / 2;
+        int start = mid - mid / 2;
+        int end = mid + mid / 2;
+        return number.substring(0, start)
+            + times("*", len - (end - start))
+            + number.substring(end);
+      }
+
+      private String times(String str, int n) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; ++i) {
+          sb.append(str);
+        }
+        return sb.toString();
       }
     }).start();
   }
@@ -73,17 +101,9 @@ public class CallTracker extends BroadcastReceiver {
     return "IDLE".equals(state);
   }
 
-  private String noNull(String str) {
-    return str == null ? "" : str;
-  }
-
   private boolean isTrackableCall(Storage storage, String number) {
     for (String prefix : storage.getTrackabelNumberPrefixes()) {
-      if (prefix.startsWith("~")) {
-        if (number.startsWith(prefix.substring(1))) {
-          return false;
-        }
-      } else if (number.startsWith(prefix)) {
+      if (number.startsWith(prefix)) {
         return true;
       }
     }
