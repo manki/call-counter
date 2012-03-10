@@ -51,7 +51,9 @@ public final class R {
         public static final int clear_data=0x7f04000e;
         public static final int duration=0x7f040004;
         public static final int how_many_call_minutes=0x7f04000b;
+        public static final int low_discount_call_balance=0x7f040014;
         public static final int minute=0x7f040006;
+        public static final int n_minutes_left=0x7f040015;
         public static final int name=0x7f040003;
         public static final int number=0x7f040005;
         public static final int ok=0x7f04000c;

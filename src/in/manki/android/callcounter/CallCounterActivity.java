@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -70,7 +71,14 @@ public class CallCounterActivity extends FragmentActivity {
   @Override
   protected void onStart() {
     super.onStart();
+    clearNotification();
     refreshView();
+  }
+
+  private void clearNotification() {
+    NotificationManager nm =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    nm.cancel(NotificationId.LOW_BALANCE.get());
   }
 
   @Override

@@ -1,8 +1,12 @@
 package in.manki.android.callcounter;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.provider.CallLog;
 import android.util.Log;
@@ -10,7 +14,8 @@ import android.util.Log;
 public class CallTracker extends BroadcastReceiver {
 
   private static final String TAG = "CallTracker";
-  private static final long WAIT_TIME_FOR_CALL_LOG_UPDATE = 10 * 1000;
+  private static final long WAIT_TIME_FOR_CALL_LOG_UPDATE = 5 * 1000;
+  private static final int WARN_MINUTES = 10;
   private static final String[] SELECTED_COLS = new String[] {
       CallLog.Calls.DATE,
       CallLog.Calls.CACHED_NAME,
@@ -68,7 +73,32 @@ public class CallTracker extends BroadcastReceiver {
           long minutes = (long) Math.ceil(seconds / 60.0);
           storage.track(name, number, callTime, minutes, tracked);
           Log.d(TAG, String.format("Tracking %d minutes long call to %s.",
-              obfuscate(number), minutes));
+              minutes, obfuscate(number)));
+        }
+
+        notifyIfLowBalance(ctx, storage);
+      }
+
+      private void notifyIfLowBalance(Context ctx, Storage storage) {
+        long remaining = storage.getRemainingMinutes();
+        if (remaining <= WARN_MINUTES) {
+          NotificationManager nm = (NotificationManager)
+              ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+
+          Resources res = ctx.getResources();
+          String lowBalance = res.getString(R.string.low_discount_call_balance);
+          String msg =
+              String.format(res.getString(R.string.n_minutes_left), remaining);
+
+          Notification notif = new Notification(
+              R.drawable.ic_launcher, lowBalance, System.currentTimeMillis());
+          PendingIntent pi = PendingIntent.getActivity(
+              ctx,
+              0,
+              new Intent(ctx, CallCounterActivity.class),
+              Notification.FLAG_AUTO_CANCEL);
+          notif.setLatestEventInfo(ctx, lowBalance, msg, pi);
+          nm.notify(NotificationId.LOW_BALANCE.get(), notif);
         }
       }
 

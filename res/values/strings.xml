@@ -21,5 +21,7 @@
     <string name="prefix_caption">Phone number prefixes qualified for discount:</string>
     <string name="prefix_sample">+91\n0011</string>
     <string name="call_time">Call Time</string>
+    <string name="low_discount_call_balance">Low discount call balance</string>
+    <string name="n_minutes_left">%1$s minute(s) remaining</string>
 
 </resources>
