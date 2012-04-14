@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.PhoneLookup;
 import android.support.v4.app.FragmentActivity;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
@@ -70,14 +72,24 @@ public class CallCounterActivity extends FragmentActivity {
           AdapterView<?> parent, View view, int position, long id) {
         Cursor c = (Cursor) callHistory.getItemAtPosition(position);
         String number = c.getString(3);    // Number is 3rd column in selection.
-        call(number);
+        findContact(number);
       }
     });
   }
 
-  private void call(String number) {
-    Intent ci = new Intent(Intent.ACTION_CALL);
-    ci.setData(Uri.parse("tel:" + number));
+  private void findContact(String number) {
+    Uri query = Uri.withAppendedPath(
+        PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
+    Cursor results = getContentResolver().query(
+        query, new String[] {PhoneLookup._ID}, null, null, null);
+    if (!results.moveToFirst()) {
+      return;
+    }
+
+    long contactId = results.getLong(0);
+    Intent ci = new Intent(Intent.ACTION_VIEW);
+    ci.setData(Uri.withAppendedPath(
+        ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactId)));
     startActivity(ci);
   }
 
