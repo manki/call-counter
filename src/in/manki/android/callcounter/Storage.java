@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class Storage {
@@ -20,24 +21,32 @@ public class Storage {
 
   // Preference strings.
   private static final String PREFS_FILE = "CallCounterPrefs";
+  static final String BACKUP_PREFS_FILE = "CallCounterBackupPrefs";
   private static final String TRACKING_ENABLED = "tracking-enabled";
   private static final String TRACK_MIN_CALL_TIME = "track-min-call-time";
   private static final String CREDIT_MINUTES = "credit-minutes";
   private static final String NUMBER_PREFIXES = "number-prefixes";
 
   private final SharedPreferences prefs;
+  private final SharedPreferences backupPrefs;
   private final CallLogDatabaseOpenHelper dbHelper;
 
-  public Storage(SharedPreferences prefs, CallLogDatabaseOpenHelper dbHelper) {
+  public Storage(
+      SharedPreferences prefs,
+      SharedPreferences backupPrefs,
+      CallLogDatabaseOpenHelper dbHelper) {
     this.prefs = prefs;
+    this.backupPrefs = backupPrefs;
     this.dbHelper = dbHelper;
   }
 
   public static Storage get(Context ctx) {
     SharedPreferences prefs =
         ctx.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
+    SharedPreferences backupPrefs =
+        ctx.getSharedPreferences(BACKUP_PREFS_FILE, Context.MODE_PRIVATE);
     CallLogDatabaseOpenHelper dbHelper = new CallLogDatabaseOpenHelper(ctx);
-    return new Storage(prefs, dbHelper);
+    return new Storage(prefs, backupPrefs, dbHelper);
   }
 
   public long getRemainingMinutes() {
@@ -169,9 +178,11 @@ public class Storage {
   }
 
   public void setTrackingEnabled(boolean enabled) {
-    prefs.edit()
-        .putBoolean(TRACKING_ENABLED, enabled)
-        .commit();
+    for (SharedPreferences p : ImmutableList.of(prefs, backupPrefs)) {
+      p.edit()
+          .putBoolean(TRACKING_ENABLED, enabled)
+          .commit();
+    }
     setTrackMinCallTime(new Date().getTime());
   }
 
@@ -180,9 +191,11 @@ public class Storage {
   }
 
   private void setTrackMinCallTime(long t) {
-    prefs.edit()
-        .putLong(TRACK_MIN_CALL_TIME, t)
-        .commit();
+    for (SharedPreferences p : ImmutableList.of(prefs, backupPrefs)) {
+      p.edit()
+          .putLong(TRACK_MIN_CALL_TIME, t)
+          .commit();
+    }
   }
 
   public long getCreditMinutes() {
@@ -201,8 +214,10 @@ public class Storage {
   }
 
   public void setTrackableNumberPrefixes(Set<String> prefixes) {
-    prefs.edit()
-        .putString(NUMBER_PREFIXES, Joiner.on(' ').join(prefixes))
-        .commit();
+    for (SharedPreferences p : ImmutableList.of(prefs, backupPrefs)) {
+      p.edit()
+          .putString(NUMBER_PREFIXES, Joiner.on(' ').join(prefixes))
+          .commit();
+    }
   }
 }
