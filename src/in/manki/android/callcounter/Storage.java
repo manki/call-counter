@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class Storage {
@@ -20,31 +19,31 @@ public class Storage {
       CallLogDatabaseOpenHelper.CALL_TIME_COLUMN + " DESC";
 
   // Preference strings.
-  private static final String PREFS_FILE = "CallCounterPrefs";
-  static final String BACKUP_PREFS_FILE = "CallCounterBackupPrefs";
+  private static final String TRANSIENT_PREFS_FILE = "CallCounterPrefs";
+  static final String PREFS_FILE = "CallCounterBackupPrefs";
   private static final String TRACKING_ENABLED = "tracking-enabled";
   private static final String TRACK_MIN_CALL_TIME = "track-min-call-time";
   private static final String CREDIT_MINUTES = "credit-minutes";
   private static final String NUMBER_PREFIXES = "number-prefixes";
 
+  private final SharedPreferences transientPrefs;
   private final SharedPreferences prefs;
-  private final SharedPreferences backupPrefs;
   private final CallLogDatabaseOpenHelper dbHelper;
 
   public Storage(
       SharedPreferences prefs,
       SharedPreferences backupPrefs,
       CallLogDatabaseOpenHelper dbHelper) {
-    this.prefs = prefs;
-    this.backupPrefs = backupPrefs;
+    this.transientPrefs = prefs;
+    this.prefs = backupPrefs;
     this.dbHelper = dbHelper;
   }
 
   public static Storage get(Context ctx) {
     SharedPreferences prefs =
-        ctx.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
+        ctx.getSharedPreferences(TRANSIENT_PREFS_FILE, Context.MODE_PRIVATE);
     SharedPreferences backupPrefs =
-        ctx.getSharedPreferences(BACKUP_PREFS_FILE, Context.MODE_PRIVATE);
+        ctx.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     CallLogDatabaseOpenHelper dbHelper = new CallLogDatabaseOpenHelper(ctx);
     return new Storage(prefs, backupPrefs, dbHelper);
   }
@@ -75,7 +74,8 @@ public class Storage {
     }
   }
 
-  public void track(String name, String number, long timestamp, long minutes, boolean tracked) {
+  public void track(String name, String number, long timestamp, long minutes,
+      boolean tracked) {
     ContentValues values = new ContentValues();
     values.put(CallLogDatabaseOpenHelper.CALL_TIME_COLUMN, timestamp);
     values.put(CallLogDatabaseOpenHelper.NAME_COLUMN, name);
@@ -174,50 +174,64 @@ public class Storage {
   }
 
   public boolean isTrackingEnabled() {
-    return prefs.getBoolean(TRACKING_ENABLED, false);
+    if (prefs.contains(TRACKING_ENABLED)) {
+	    return prefs.getBoolean(TRACKING_ENABLED, false);
+    }
+    setTrackingEnabled(transientPrefs.getBoolean(TRACKING_ENABLED, false));
+    return isTrackingEnabled();
   }
 
   public void setTrackingEnabled(boolean enabled) {
-    for (SharedPreferences p : ImmutableList.of(prefs, backupPrefs)) {
-      p.edit()
-          .putBoolean(TRACKING_ENABLED, enabled)
-          .commit();
-    }
+    prefs.edit()
+        .putBoolean(TRACKING_ENABLED, enabled)
+        .commit();
     setTrackMinCallTime(new Date().getTime());
   }
 
   public long getTrackMinCallTime() {
-    return prefs.getLong(TRACK_MIN_CALL_TIME, 0);
+    if (prefs.contains(TRACK_MIN_CALL_TIME)) {
+      return prefs.getLong(TRACK_MIN_CALL_TIME, 0);
+    }
+    setTrackMinCallTime(transientPrefs.getLong(TRACK_MIN_CALL_TIME, 0));
+    return getTrackMinCallTime();
   }
 
   private void setTrackMinCallTime(long t) {
-    for (SharedPreferences p : ImmutableList.of(prefs, backupPrefs)) {
-      p.edit()
-          .putLong(TRACK_MIN_CALL_TIME, t)
-          .commit();
-    }
+    prefs.edit()
+        .putLong(TRACK_MIN_CALL_TIME, t)
+        .commit();
   }
 
   public long getCreditMinutes() {
-    return prefs.getLong(CREDIT_MINUTES, 0);
+    return transientPrefs.getLong(CREDIT_MINUTES, 0);
   }
 
   public void setCreditMinutes(long mins) {
-    prefs.edit()
+    transientPrefs.edit()
         .putLong(CREDIT_MINUTES, mins)
         .commit();
   }
 
-  public Set<String> getTrackabelNumberPrefixes() {
-    String prefixes = prefs.getString(NUMBER_PREFIXES, "");
-    return ImmutableSet.copyOf(Splitter.on(' ').split(prefixes));
+  public Set<String> getTrackableNumberPrefixes() {
+    if (prefs.contains(NUMBER_PREFIXES)) {
+      return parsePrefixes(prefs.getString(NUMBER_PREFIXES, ""));
+    }
+    setTrackableNumberPrefixes(
+        parsePrefixes(transientPrefs.getString(NUMBER_PREFIXES, "")));
+    return getTrackableNumberPrefixes();
   }
 
   public void setTrackableNumberPrefixes(Set<String> prefixes) {
-    for (SharedPreferences p : ImmutableList.of(prefs, backupPrefs)) {
-      p.edit()
-          .putString(NUMBER_PREFIXES, Joiner.on(' ').join(prefixes))
-          .commit();
-    }
+    prefs.edit()
+        .putString(NUMBER_PREFIXES, prefixesAsString(prefixes))
+        .commit();
+  }
+
+  private Set<String> parsePrefixes(String prefixes) {
+    return ImmutableSet.copyOf(Splitter.on(' ').split(prefixes));
+  }
+
+  private String prefixesAsString(Set<String> prefixes) {
+    return Joiner.on(' ').join(prefixes);
   }
 }

@@ -9,7 +9,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
   public void onCreate() {
     super.onCreate();
     SharedPreferencesBackupHelper helper =
-        new SharedPreferencesBackupHelper(this, Storage.BACKUP_PREFS_FILE);
+        new SharedPreferencesBackupHelper(this, Storage.PREFS_FILE);
     addHelper("prefs", helper);
   }
 }
