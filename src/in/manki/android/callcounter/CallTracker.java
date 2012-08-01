@@ -40,7 +40,8 @@ public class CallTracker extends BroadcastReceiver {
           Log.d(TAG, "Sleeping for call log to be updated.");
           Thread.sleep(WAIT_TIME_FOR_CALL_LOG_UPDATE);
         } catch (InterruptedException e) {
-          // Just ignore.
+          Thread.currentThread().interrupt();
+          return;
         }
 
         long limit = Math.max(
