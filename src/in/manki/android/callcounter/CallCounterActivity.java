@@ -184,7 +184,7 @@ public class CallCounterActivity extends FragmentActivity {
 
     EditText prefixes = (EditText) findViewById(R.id.prefixes);
     prefixes.setText(
-        Joiner.on('\n').join(storage.getTrackableNumberPrefixes()));
+        Joiner.on('\n').join(storage.getTrackabelNumberPrefixes()));
 
     Cursor cursor = storage.getTrackedCalls();
     startManagingCursor(cursor);

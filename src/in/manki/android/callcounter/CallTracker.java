@@ -132,7 +132,7 @@ public class CallTracker extends BroadcastReceiver {
   }
 
   private boolean isTrackableCall(Storage storage, String number) {
-    for (String prefix : storage.getTrackableNumberPrefixes()) {
+    for (String prefix : storage.getTrackabelNumberPrefixes()) {
       if (number.startsWith(prefix)) {
         return true;
       }
