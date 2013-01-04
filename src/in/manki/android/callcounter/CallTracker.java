@@ -46,7 +46,7 @@ public class CallTracker extends BroadcastReceiver {
 
         long limit = Math.max(
             storage.getTrackMinCallTime(), storage.getLastKnownCallTime());
-        if (limit == 0) {
+        if (limit == 0 || !storage.isTrackingEnabled()) {
           Log.d(TAG, "Tracking disabled; exiting.");
           return;
         }
