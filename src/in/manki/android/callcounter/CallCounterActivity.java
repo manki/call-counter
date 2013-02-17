@@ -15,13 +15,16 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.CursorAdapter;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
@@ -29,7 +32,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.QuickContactBadge;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -188,41 +191,66 @@ public class CallCounterActivity extends FragmentActivity {
 
     Cursor cursor = storage.getTrackedCalls();
     startManagingCursor(cursor);
-    SimpleCursorAdapter adapter = new SimpleCursorAdapter(
-        this,
-        R.layout.call_log_entry,
-        cursor,
-        new String[] {
-            CallLogDatabaseOpenHelper.NAME_COLUMN,
-            CallLogDatabaseOpenHelper.NUMBER_COLUMN,
-            CallLogDatabaseOpenHelper.CALL_TIME_COLUMN,
-            CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN,
-        },
-        new int[] {
-            R.id.name,
-            R.id.number,
-            R.id.call_time,
-            R.id.duration,
-        }) {
-      private static final long TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+    CursorAdapter ad = new CursorAdapter(this, cursor) {
       @Override
-      public void setViewText(TextView v, String text) {
-        if (v.getId() == R.id.call_time) {
-          long callTime = Long.parseLong(text);
-          long now = new Date().getTime();
-          if (now - callTime < TWENTY_FOUR_HOURS) {
-            text = DateFormat.getTimeFormat(CallCounterActivity.this)
-                .format(new Date(callTime));
-          } else {
-            text = DateFormat.getDateFormat(CallCounterActivity.this)
-                .format(new Date(callTime));
-          }
+      public View newView(Context ctx, Cursor cursor, ViewGroup parent) {
+        LayoutInflater inflater = LayoutInflater.from(ctx);
+        return inflater.inflate(R.layout.call_log_entry, parent, false);
+      }
+
+      private static final long TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+      private String getString(Cursor cursor, String colName) {
+        return cursor.getString(cursor.getColumnIndexOrThrow(colName));
+      }
+
+      @Override
+      public void bindView(View view, Context ctx, Cursor cursor) {
+        TextView name = (TextView) view.findViewById(R.id.name);
+        name.setText(getString(cursor, CallLogDatabaseOpenHelper.NAME_COLUMN));
+
+        String phoneNumber =
+            getString(cursor, CallLogDatabaseOpenHelper.NUMBER_COLUMN);
+        configureContactBadge(view, phoneNumber);
+        TextView number = (TextView) view.findViewById(R.id.number);
+        number.setText(phoneNumber);
+
+        TextView callTimeView = (TextView) view.findViewById(R.id.call_time);
+        long callTime = Long.parseLong(
+            getString(cursor, CallLogDatabaseOpenHelper.CALL_TIME_COLUMN));
+        long now = new Date().getTime();
+        if (now - callTime < TWENTY_FOUR_HOURS) {
+          callTimeView.setText(
+              DateFormat.getTimeFormat(CallCounterActivity.this)
+                  .format(new Date(callTime)));
+        } else {
+          callTimeView.setText(
+              DateFormat.getDateFormat(CallCounterActivity.this)
+                  .format(new Date(callTime)));
         }
-        super.setViewText(v, text);
+
+        TextView callDuration = (TextView) view.findViewById(R.id.duration);
+        callDuration.setText(
+            getString(cursor, CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN));
+      }
+
+      private void configureContactBadge(View parent, String phoneNumber) {
+        QuickContactBadge badge =
+            (QuickContactBadge) parent.findViewById(R.id.contact_badge);
+        badge.assignContactFromPhone(phoneNumber, true);
+
+        Uri uri = Uri.withAppendedPath(
+            PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        String[] projection = new String[] {PhoneLookup.PHOTO_THUMBNAIL_URI};
+        Cursor results =
+            getContentResolver().query(uri, projection, null, null, null);
+        if (results.moveToFirst()) {
+          badge.setImageURI(Uri.parse(results.getString(0)));
+        }
       }
     };
     ListView callHistory = (ListView) findViewById(R.id.call_history);
-    callHistory.setAdapter(adapter);
+    callHistory.setAdapter(ad);
   }
 
   private Storage getStorage(Context ctx) {

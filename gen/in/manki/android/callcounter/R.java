@@ -19,9 +19,9 @@ public final class R {
         public static final int add_minutes=0x7f06000f;
         public static final int call_history=0x7f06000c;
         public static final int call_time=0x7f060002;
+        public static final int contact_badge=0x7f060000;
         public static final int duration=0x7f060004;
         public static final int enabled=0x7f060009;
-        public static final int imageButton1=0x7f060000;
         public static final int linearLayout1=0x7f060006;
         public static final int name=0x7f060001;
         public static final int new_discount_minutes=0x7f06000d;
