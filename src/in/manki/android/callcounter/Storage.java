@@ -15,8 +15,9 @@ import com.google.common.collect.ImmutableSet;
 
 public class Storage {
 
-  private final String REVERSE_CHRONOLOGICAL =
+  private static final String REVERSE_CHRONOLOGICAL =
       CallLogDatabaseOpenHelper.CALL_TIME_COLUMN + " DESC";
+  private static final int MAX_CALL_LOG_ENTRIES = 50;
 
   // Preference strings.
   private static final String PREFS_FILE = "CallCounterPrefs";
@@ -154,14 +155,32 @@ public class Storage {
         orderBy);
   }
 
+  private Cursor openWithLimit(
+      SQLiteDatabase db,
+      String where,
+      String[] whereArgs,
+      String orderBy,
+      String limit) {
+    return db.query(
+        CallLogDatabaseOpenHelper.TRACKED_CALLS_TABLE,
+        CallLogDatabaseOpenHelper.ALL_COLUMNS,
+        where,
+        whereArgs,
+        null,    // group by
+        null,    // having
+        orderBy,
+        limit);
+  }
+
   public Cursor getTrackedCalls() {
     SQLiteDatabase db = dbHelper.getReadableDatabase();
-    return open(
+    return openWithLimit(
         db,
         CallLogDatabaseOpenHelper.TRACKED_COLUMN + " = 1 AND "
             + CallLogDatabaseOpenHelper.ARCHIVED_COLUMN + " = 0",
         null,
-        REVERSE_CHRONOLOGICAL);
+        REVERSE_CHRONOLOGICAL,
+        String.valueOf(MAX_CALL_LOG_ENTRIES));
   }
 
   public boolean isTrackingEnabled() {
