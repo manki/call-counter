@@ -178,6 +178,11 @@ public class CallCounterActivity extends FragmentActivity {
     refreshView();
   }
 
+  @SuppressWarnings("deprecation")
+  private void startManaging(Cursor cursor) {
+    startManagingCursor(cursor);
+  }
+
   private void refreshView() {
     Storage storage = getStorage(this);
 
@@ -192,8 +197,8 @@ public class CallCounterActivity extends FragmentActivity {
         Joiner.on('\n').join(storage.getTrackabelNumberPrefixes()));
 
     Cursor cursor = storage.getTrackedCalls();
-    startManagingCursor(cursor);
-    CursorAdapter ad = new CursorAdapter(this, cursor) {
+    startManaging(cursor);
+    CursorAdapter ad = new CursorAdapter(this, cursor, false) {
       @Override
       public View newView(Context ctx, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(ctx);

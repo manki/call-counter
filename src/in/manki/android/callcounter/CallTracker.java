@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.provider.CallLog;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class CallTracker extends BroadcastReceiver {
@@ -91,15 +92,18 @@ public class CallTracker extends BroadcastReceiver {
           String msg =
               String.format(res.getString(R.string.n_minutes_left), remaining);
 
-          Notification notif = new Notification(
-              R.drawable.ic_launcher, lowBalance, System.currentTimeMillis());
           PendingIntent pi = PendingIntent.getActivity(
               ctx,
               0,
               new Intent(ctx, CallCounterActivity.class),
               Notification.FLAG_AUTO_CANCEL);
-          notif.setLatestEventInfo(ctx, lowBalance, msg, pi);
-          nm.notify(NotificationId.LOW_BALANCE.get(), notif);
+
+          NotificationCompat.Builder notif = new NotificationCompat.Builder(ctx)
+              .setSmallIcon(R.drawable.ic_launcher)
+              .setTicker(lowBalance)
+              .setContentText(msg)
+              .setContentIntent(pi);
+          nm.notify(NotificationId.LOW_BALANCE.get(), notif.getNotification());
         }
       }
 
