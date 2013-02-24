@@ -1,63 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="5dp"
+    android:orientation="horizontal" >
 
     <QuickContactBadge
         android:id="@+id/contact_badge"
         android:layout_width="54dp"
         android:layout_height="54dp"
-        android:padding="3dp" />
-    
-	<TableLayout
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:stretchColumns="1" >
-	
-	    <TableRow>	
-	      <TextView
-	          android:id="@+id/name"
-	          android:layout_width="wrap_content"
-	          android:layout_height="wrap_content"
-	          android:text="@string/name"
-	          android:textAppearance="?android:attr/textAppearanceMedium" />
-	
-	      <TextView
-	          android:id="@+id/call_time"
-	          android:layout_width="wrap_content"
-	          android:layout_height="wrap_content"
-	          android:layout_gravity="right|bottom"
-	          android:layout_span="2"
-	          android:text="@string/call_time" />
-	
-	    </TableRow>
-	
-	    <TableRow>
-	
-	    <TextView
-	        android:id="@+id/number"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/number" />
-	
-	    <TextView
-	        android:id="@+id/duration"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="right|bottom"
-	        android:text="@string/duration"
-	        android:textAppearance="?android:attr/textAppearanceMedium" />
-	
-	    <TextView
-	        android:id="@+id/textView1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="bottom"
-	        android:layout_marginLeft="5dp"
-	        android:text="@string/minute" />
-	
-	    </TableRow>
-	
-	</TableLayout>
-</LinearLayout>
+        android:layout_alignBaseline="@+id/call"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:padding="3dp"
+        android:src="@drawable/ic_contact_picture" />
+
+    <TableLayout
+        android:id="@+id/TableLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/call"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/call"
+        android:layout_toRightOf="@+id/contact_badge"
+        android:stretchColumns="1" >
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/call_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:layout_span="2"
+                android:text="@string/call_time" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/number" />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:text="@string/duration"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="5dp"
+                android:text="@string/minute" />
+        </TableRow>
+    </TableLayout>
+
+    <ImageButton
+        android:id="@+id/call"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:contentDescription="@string/call_this_contact"
+        android:src="@android:drawable/ic_menu_call" />
+
+</RelativeLayout>

@@ -31,6 +31,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
@@ -209,7 +210,7 @@ public class CallCounterActivity extends FragmentActivity {
         TextView name = (TextView) view.findViewById(R.id.name);
         name.setText(getString(cursor, CallLogDatabaseOpenHelper.NAME_COLUMN));
 
-        String phoneNumber =
+        final String phoneNumber =
             getString(cursor, CallLogDatabaseOpenHelper.NUMBER_COLUMN);
         configureContactBadge(view, phoneNumber);
         TextView number = (TextView) view.findViewById(R.id.number);
@@ -232,6 +233,16 @@ public class CallCounterActivity extends FragmentActivity {
         TextView callDuration = (TextView) view.findViewById(R.id.duration);
         callDuration.setText(
             getString(cursor, CallLogDatabaseOpenHelper.CALL_DURATION_COLUMN));
+
+        ImageButton call = (ImageButton) view.findViewById(R.id.call);
+        call.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + phoneNumber));
+            startActivity(intent);
+          }
+        });
       }
 
       private void configureContactBadge(View parent, String phoneNumber) {
