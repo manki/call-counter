@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -252,11 +253,13 @@ public class CallCounterActivity extends FragmentActivity {
 
         Uri uri = Uri.withAppendedPath(
             PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        String[] projection = new String[] {PhoneLookup.PHOTO_THUMBNAIL_URI};
+        String[] projection = new String[] {PhoneLookup.PHOTO_ID};
         Cursor results =
             getContentResolver().query(uri, projection, null, null, null);
         if (results.moveToFirst()) {
-          badge.setImageURI(Uri.parse(results.getString(0)));
+          Uri imageUri = ContentUris.withAppendedId(
+              ContactsContract.Data.CONTENT_URI, results.getLong(0));
+          badge.setImageURI(imageUri);
         }
       }
     };
